@@ -246,7 +246,7 @@ tr.me td{font-weight:800}
   <div class="form">
     <div class="field"><label for="name">도전자 성명</label><input id="name" maxlength="20" placeholder="실명으로 입력하세요" autocomplete="off"></div>
     <div class="field"><label for="empId">사번 앞 4자리</label><input id="empId" maxlength="4" placeholder="예) A123" autocomplete="off"></div>
-    <div class="field"><label for="unit">소속 부서(Unit)</label><input id="unit" maxlength="30" placeholder="예) 000 Unit" autocomplete="off"></div>
+    <div class="field"><label for="unit">소속 부서 또는 진료과</label><input id="unit" maxlength="30" placeholder="예) 000 Unit, 이비인후과, PI팀 등" autocomplete="off"></div>
     <div id="err" class="error" role="alert"></div>
     <div class="consent"><label><input id="privacyConsent" type="checkbox"> <span>경품 수령 및 참여 확인을 위한 개인정보 수집·이용에 동의합니다. 수집 항목: 성명, 사번 앞 4자리, 소속 부서, 게임 기록.</span></label></div>
     <div class="consent"><label><input id="prizeConsent" type="checkbox"> <span>최종 참여 인증샷 제출을 완료해야 이벤트 참여가 가능하며, 경품 수령 시 경품 금액에 대한 세금은 추후 월급에서 차감되는 것에 동의합니다.</span></label></div>
@@ -300,7 +300,7 @@ tr.me td{font-weight:800}
   <div class="trophy">🏆</div>
   <div id="totalScore" class="score"></div>
   <h2><span id="finalName"></span> 님, 환자안전 영웅으로 인정합니다!</h2>
-  <div class="capture"><div class="finalGrid"><div class="box"><small>총 점수</small><b id="scoreAgain"></b></div><div class="box"><small>정확도</small><b id="allAcc"></b></div><div class="box"><small>평균 타수</small><b id="allCpm"></b></div><div class="box"><small>총 소요 시간</small><b id="allTime"></b></div></div>
+  <div class="capture"><div class="finalGrid"><div class="box"><small>총 점수</small><b id="scoreAgain"></b></div><div class="box"><small>정확도</small><b id="allAcc"></b></div><div class="box"><small>평균 타수</small><b id="allCpm"></b></div><div class="box"><small>총 타이핑 시간</small><b id="allTime"></b></div></div>
   <p class="notice">인증샷 제출용 화면입니다. 도전자 이름, 점수, Ranking이 보이도록 캡처해 주세요.</p></div>
   <div class="actions"><button class="btn" onclick="window.print()">결과 저장/인쇄</button><button class="btn gray" onclick="startChallenge()">처음부터 다시 도전</button><button class="btn white" onclick="goHome()">처음으로</button><button class="btn white" onclick="openRanking()">랭킹 보기</button></div>
 </div></section>
@@ -357,7 +357,7 @@ function valid(alertIt=false){
   let p=info(),msg="";
   if(!p.name) msg="도전자 성명을 입력하세요.";
   else if(!/^[A-Z][0-9]{3}$/.test(p.employeeId)) msg="사번 앞 4자리는 알파벳 1글자와 숫자 3자리로 입력하세요. 예: A990";
-  else if(!p.unit) msg="소속 부서(Unit)를 입력하세요.";
+  else if(!p.unit) msg="소속 부서 또는 진료과를 입력하세요.";
   else if(!$("privacyConsent").checked) msg="개인정보 수집·이용 동의가 필요합니다.";
   else if(!$("prizeConsent").checked) msg="경품 추첨 및 세금 차감 안내에 대한 동의가 필요합니다.";
   $("err").textContent=msg;
@@ -499,14 +499,14 @@ function restartStage(){startStage(si,true)}
 function rank(sc){if(sc>=95)return["👑 MASTER","환자안전 마스터","#7c3aed"];if(sc>=85)return["🏆 EXPERT","환자안전 전문가","#dc2626"];if(sc>=70)return["🥇 LEADER","환자안전 리더","#ea580c"];if(sc>=50)return["🥈 PRACTICE","환자안전 실천가","#2563eb"];if(sc>=30)return["🥉 SEED","환자안전 새싹","#059669"];return["🌱 RETRY","다시 도전!","#64748b"]}
 async function allClear(){
   if(records.filter(Boolean).length<stages.length){alert("모든 Stage를 완료해야 최종 결과를 볼 수 있습니다.");showSelect();return}
-  let totalSec=Math.max(1,Math.floor((Date.now()-chalStart)/1000)),
-      valid=records.filter(Boolean),
+  let valid=records.filter(Boolean),
+      totalSec=Math.max(1,valid.reduce((a,r)=>a+r.sec,0)),
       typed=valid.reduce((a,r)=>a+r.typed,0),
       possible=valid.reduce((a,r)=>a+r.possible,0),
       correct=valid.reduce((a,r)=>a+r.correct,0),
       avgAcc=possible?Math.round(correct/possible*100):100,
       avgCpm=Math.round(typed/totalSec*60),
-      final=score(avgCpm,avgAcc,totalSec),
+      final=Math.round(valid.reduce((a,r)=>a+r.score,0)/valid.length),
       r=rank(final);
   $("finalName").textContent=info().name;
   $("totalScore").textContent=final+"점";
