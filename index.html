@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#005B5E">
 <title>AMC 환자안전 타자 챌린지</title>
+<script>
+/* Google 애널리틱스 측정 ID를 아래 따옴표 안에 입력하세요. 예: "G-ABC123XYZ" (비워두면 비활성) */
+var GA_ID="G-1YN1VD2PWH";
+if(/^G-[A-Z0-9]+$/.test(GA_ID)){
+  var s=document.createElement("script");s.async=true;
+  s.src="https://www.googletagmanager.com/gtag/js?id="+GA_ID;
+  document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=function(){dataLayer.push(arguments)};
+  gtag("js",new Date());gtag("config",GA_ID);
+}
+window.trackEvent=function(name,params){try{if(window.gtag)gtag("event",name,params||{})}catch(e){}};
+</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
@@ -401,7 +414,7 @@ function renderGrid(){
 }
 function goHome(){clearInterval(timer);stopBgm();paused=false;counting=false;$("pauseOverlay").classList.add("hidden");$("countOverlay").classList.add("hidden");show("home");formState()}
 function showSelect(){if(!valid(true))return;clearInterval(timer);stopBgm();paused=false;counting=false;$("pauseOverlay").classList.add("hidden");$("countOverlay").classList.add("hidden");renderGrid();show("select")}
-function startChallenge(){if(!valid(true))return;records=[];saved=false;finalAt=null;chalStart=Date.now();startStage(0,true)}
+function startChallenge(){if(!valid(true))return;trackEvent("challenge_start");records=[];saved=false;finalAt=null;chalStart=Date.now();startStage(0,true)}
 
 /* ================= gameplay ================= */
 function startStage(i,keep=false){
@@ -495,7 +508,7 @@ function score(cpm,acc,sec=60){
   const timeScore=Math.max(0,Math.min(100,Math.round((timeTarget/Math.max(sec,1))*100)));
   return Math.min(100,Math.round(accScore*0.50+speedScore*0.40+timeScore*0.10));
 }
-function complete(){clearInterval(timer);stopBgm();playEffect("stageClear");let sec=Math.max(1,Math.floor((Date.now()-stageStart)/1000)),cpm=Math.round(stageTyped/sec*60),acc=stagePossible?Math.round(stageCorrect/stagePossible*100):100,errors=stagePossible-stageCorrect,sc=score(cpm,acc,sec);records[si]={stage:si+1,topic:stages[si].topic,typed:stageTyped,possible:stagePossible,correct:stageCorrect,errors,sec,cpm,acc,score:sc,stars:starsByScore(sc)};$("clearTitle").textContent=`STAGE ${si+1}. ${stages[si].topic}`;$("stageStars").innerHTML=starHtml(records[si].stars,true);$("stageScorePlus").textContent="+"+sc+"점 획득";showFeedback(sc>=80?"Excellent!":(sc>=50?"Good!":"Keep Going!"),"Stage "+(si+1)+" Clear");$("stageAcc").textContent=acc+"%";$("stageCpm").textContent=cpm;$("stageTime").textContent=sec+"초";var doneCount=records.filter(Boolean).length,allDone=doneCount>=stages.length;$("finalBtn").disabled=!allDone;$("nextStageBtn").classList.toggle("hidden",allDone);$("clearMsg").textContent=allDone?"모든 Stage를 완료했습니다. 최종 결과를 확인하세요!":"현재 "+doneCount+" / "+stages.length+" Stage 완료 — 남은 Stage를 모두 완료하면 최종 결과 보기가 활성화됩니다.";show("finish")}
+function complete(){clearInterval(timer);stopBgm();playEffect("stageClear");let sec=Math.max(1,Math.floor((Date.now()-stageStart)/1000)),cpm=Math.round(stageTyped/sec*60),acc=stagePossible?Math.round(stageCorrect/stagePossible*100):100,errors=stagePossible-stageCorrect,sc=score(cpm,acc,sec);trackEvent("stage_complete",{stage:si+1,score:sc});records[si]={stage:si+1,topic:stages[si].topic,typed:stageTyped,possible:stagePossible,correct:stageCorrect,errors,sec,cpm,acc,score:sc,stars:starsByScore(sc)};$("clearTitle").textContent=`STAGE ${si+1}. ${stages[si].topic}`;$("stageStars").innerHTML=starHtml(records[si].stars,true);$("stageScorePlus").textContent="+"+sc+"점 획득";showFeedback(sc>=80?"Excellent!":(sc>=50?"Good!":"Keep Going!"),"Stage "+(si+1)+" Clear");$("stageAcc").textContent=acc+"%";$("stageCpm").textContent=cpm;$("stageTime").textContent=sec+"초";var doneCount=records.filter(Boolean).length,allDone=doneCount>=stages.length;$("finalBtn").disabled=!allDone;$("nextStageBtn").classList.toggle("hidden",allDone);$("clearMsg").textContent=allDone?"모든 Stage를 완료했습니다. 최종 결과를 확인하세요!":"현재 "+doneCount+" / "+stages.length+" Stage 완료 — 남은 Stage를 모두 완료하면 최종 결과 보기가 활성화됩니다.";show("finish")}
 function nextStage(){for(let k=1;k<=stages.length;k++){const idx=(si+k)%stages.length;if(!records[idx]){startStage(idx,true);return}}allClear()}
 function restartStage(){startStage(si,true)}
 function rank(sc){if(sc>=95)return["👑 MASTER","환자안전 마스터","#7c3aed"];if(sc>=85)return["🏆 EXPERT","환자안전 전문가","#dc2626"];if(sc>=70)return["🥇 LEADER","환자안전 리더","#ea580c"];if(sc>=50)return["🥈 PRACTICE","환자안전 실천가","#2563eb"];if(sc>=30)return["🥉 SEED","환자안전 새싹","#059669"];return["🌱 RETRY","다시 도전!","#64748b"]}
@@ -520,6 +533,7 @@ async function allClear(){
   $("rankBadge").style.background=r[2];
   stopBgm();
   playEffect("allClear");
+  trackEvent("challenge_complete",{score:final});
   show("allclear");
   launchConfetti();
   if(!saved){
@@ -545,6 +559,7 @@ async function showMyResult(){
   try{rec=(await list(true)).find(match)||null}catch(e){alert("기록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.");return}
   if(!rec)rec=best(localRaw()).find(match)||null;
   if(!rec){alert("완료 기록을 찾을 수 없습니다.\n완주 당시 입력했던 성명·사번·소속과 동일하게 입력했는지 확인해 주세요.");return}
+  trackEvent("view_my_result");
   const r=rank(rec.score);
   finalAt=rec.completedAt;saved=true;
   $("finalName").textContent=me.name+"("+me.unit+")";
@@ -598,6 +613,7 @@ function jsonp(action,params={}){return new Promise((resolve,reject)=>{if(!CONFI
 async function saveRecord(r){if(CONFIG.BACKEND_URL){try{await jsonp("save",{record:r});return}catch(e){alert("공동 랭킹 저장 실패: 현재 브라우저에 임시 저장합니다.")}}localSave(r)}
 async function list(masked=true){if(CONFIG.BACKEND_URL){let data=await jsonp(masked?"list":"listFull",masked?{}:{master:info()});return data.records||[]}let l=best(localRaw());return masked?l.map(r=>({...r,name:maskName(r.name),employeeId:maskEmp(r.employeeId)})):l}
 async function openRanking(){
+  trackEvent("view_ranking");
   await formState();
   $("rankingModal").classList.remove("hidden");
   $("mode").textContent=CONFIG.BACKEND_URL?"운영 모드: 공동 랭킹 서버에 연결되어 있습니다.":"테스트 모드: 현재는 이 브라우저에만 랭킹이 저장됩니다. 공동 랭킹을 쓰려면 Google Apps Script URL을 CONFIG.BACKEND_URL에 입력하세요.";
