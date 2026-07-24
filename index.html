@@ -252,7 +252,7 @@ tr.me td{font-weight:800}
     <div class="consent"><label><input id="privacyConsent" type="checkbox"> <span>경품 수령 및 참여 확인을 위한 개인정보 수집·이용에 동의합니다. 수집 항목: 성명, 사번 앞 4자리, 소속 부서, 게임 기록.</span></label></div>
     <div class="consent"><label><input id="prizeConsent" type="checkbox"> <span>최종 참여 인증샷 제출을 완료해야 이벤트 참여가 가능하며, 경품 수령 시 경품 금액에 대한 세금은 추후 월급에서 차감되는 것에 동의합니다.</span></label></div>
     <div id="masterChip" class="master">마스터 권한이 확인되었습니다.</div>
-    <div class="actions"><button id="startBtn" class="btn" onclick="startChallenge()" disabled>게임 시작</button><button id="selectBtn" class="btn white" onclick="showSelect()" disabled>Stage 보기</button><button class="btn white" onclick="openRanking()">랭킹 보기</button></div>
+    <div class="actions"><button id="startBtn" class="btn" onclick="startChallenge()" disabled>게임 시작</button><button id="selectBtn" class="btn white" onclick="showSelect()" disabled>Stage 보기</button><button class="btn white" onclick="openRanking()">랭킹 보기</button><button id="myResultBtn" class="btn white" onclick="showMyResult()" disabled>내 결과 보기</button></div>
     <p class="notice">최종 완료 화면을 캡처하여 인증샷으로 제출하세요.</p>
   </div>
 </div></div></section>
@@ -367,7 +367,7 @@ function valid(alertIt=false){
   return !msg;
 }
 async function sha256(t){let b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
-async function formState(){let ok=valid(false);$("startBtn").disabled=!ok;$("selectBtn").disabled=!ok;let p=info();try{master=(await sha256(`${p.name}|${p.unit}|${p.employeeId}`))===CONFIG.MASTER_HASH}catch(e){master=false}$("masterChip").classList.toggle("on",master)}
+async function formState(){let ok=valid(false);$("startBtn").disabled=!ok;$("selectBtn").disabled=!ok;$("myResultBtn").disabled=!ok;let p=info();try{master=(await sha256(`${p.name}|${p.unit}|${p.employeeId}`))===CONFIG.MASTER_HASH}catch(e){master=false}$("masterChip").classList.toggle("on",master)}
 ["name","empId","unit","privacyConsent","prizeConsent"].forEach(id=>{$(id).addEventListener("input",formState);$(id).addEventListener("change",formState)});
 
 /* ================= stage select ================= */
@@ -526,6 +526,27 @@ async function allClear(){
     saved=true;
     await saveRecord({...info(),score:final,accuracy:avgAcc,cpm:avgCpm,totalSeconds:totalSec,rankLabel:r[0],rankName:r[1],stageRecords:valid,completedAt:finalAt});
   }
+}
+
+async function showMyResult(){
+  if(!valid(true))return;
+  const me=info();
+  let l=[];
+  try{l=await list(true)}catch(e){alert("기록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.");return}
+  const rec=l.find(r=>String(r.employeeId||"").toUpperCase()===me.employeeId&&String(r.unit||"").trim()===me.unit);
+  if(!rec){alert("완료 기록을 찾을 수 없습니다.\n완주 당시 입력했던 성명·사번·소속과 동일하게 입력했는지 확인해 주세요.");return}
+  const r=rank(rec.score);
+  finalAt=rec.completedAt;saved=true;
+  $("finalName").textContent=me.name+"("+me.unit+")";
+  $("finalDate").textContent="완료일시 "+fmtDate(rec.completedAt);
+  $("totalScore").textContent=rec.score+"점";
+  $("scoreAgain").textContent=rec.score;
+  $("allAcc").textContent=rec.accuracy+"%";
+  $("allCpm").textContent=rec.cpm;
+  $("allTime").textContent=rec.totalSeconds+"초";
+  $("rankBadge").textContent=r[0]+" · "+r[1];
+  $("rankBadge").style.background=r[2];
+  show("allclear");
 }
 
 /* ================= confetti ================= */
