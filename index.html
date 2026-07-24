@@ -164,6 +164,7 @@ textarea.shake{animation:shakeX .28s ease}
 .box b{font-size:33px;font-weight:900;color:var(--teal-800);letter-spacing:-.02em}
 .allclear{background:linear-gradient(160deg,#FFF9EC, #EBFAF3 45%, #EAF6FB)}
 .rank{display:inline-block;color:#fff;background:var(--ink);border-radius:999px;padding:13px 26px;font-size:clamp(19px,3.8vw,30px);font-weight:900;box-shadow:var(--shadow-md)}
+.finalDate{margin:6px 0 2px;font-weight:800;color:var(--slate);font-size:16px}
 .congrats{font-size:clamp(32px,6.6vw,58px);font-weight:900;color:var(--teal-800);margin:20px 0 4px;letter-spacing:-.04em}
 .trophy{font-size:84px;margin:8px 0;animation:trophyIn .8s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes trophyIn{0%{transform:scale(.2) rotate(-14deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
@@ -300,6 +301,7 @@ tr.me td{font-weight:800}
   <div class="trophy">🏆</div>
   <div id="totalScore" class="score"></div>
   <h2><span id="finalName"></span> 님, 환자안전 영웅으로 인정합니다!</h2>
+  <div id="finalDate" class="finalDate"></div>
   <div class="capture"><div class="finalGrid"><div class="box"><small>총 점수</small><b id="scoreAgain"></b></div><div class="box"><small>정확도</small><b id="allAcc"></b></div><div class="box"><small>평균 타수</small><b id="allCpm"></b></div><div class="box"><small>총 타이핑 시간</small><b id="allTime"></b></div></div>
   <p class="notice">인증샷 제출용 화면입니다. 도전자 이름, 점수, Ranking이 보이도록 캡처해 주세요.</p></div>
   <div class="actions"><button class="btn" onclick="window.print()">결과 저장/인쇄</button><button class="btn gray" onclick="startChallenge()">처음부터 다시 도전</button><button class="btn white" onclick="goHome()">처음으로</button><button class="btn white" onclick="openRanking()">랭킹 보기</button></div>
@@ -328,7 +330,7 @@ tr.me td{font-weight:800}
 const CONFIG={BACKEND_URL:"https://script.google.com/macros/s/AKfycbxpZpYDJDjlYoKvEop8v3W7FOtqXHOjXpMXXbiIr4iBDpcbeZUEptc2tJFLBVZTGiR-og/exec",MASTER_HASH:"1058518c73cb785070865f58c01ad47244736a5a2fd09a533ee9c602c7882aa7"};
 const STORAGE_KEY="amc_ps_typing_rank_v12";
 const stages=[{"topic":"환자 확인","icon":"📋","color":"#2563eb","story":"환자가 도착했습니다. 가장 먼저 정확한 환자 확인을 수행하세요.","sentences":["모든 의료서비스 제공 전 환자를 정확하게 확인한다.","환자명과 병원등록번호 또는 생년월일 중 두 가지 이상의 정보를 확인한다.","한 가지 이상의 정보를 개방형 질문으로 확인한다.","보호자가 없으면 서로 다른 부위에 두 개의 환자 확인 인식표를 적용하여 확인한다.","바코드 리딩 시스템으로 확인할 때는 개방형 질문으로 환자 정보를 문의한다.","동명이인 환자는 별도의 표식을 확인하여 주의한다."]},{"topic":"정확한 의사소통","icon":"🛡️","color":"#059669","story":"정확한 의사소통으로 안전한 진료를 이어가세요.","sentences":["환자에게 즉시 처방하고 수행해야 하나 바로 전산처방을 할 수 없는 경우에만 구두/전화 지시 처방 가능하다.","구두/전화 지시는 write down, read back, confirmation 절차를 준수한다.","구두/전화 지시 후 전산처방은 24시간 이내 시행한다.","구두지시처방코드관리 화면의 목록 내에서만 처방 가능하다.","PRN 처방은 허가된 목록 내에서만 처방하고 반드시 조건문을 입력한다.","부정확한 처방은 수행 전 처방의와 확인 후 수행한다."]},{"topic":"질 향상(PI) 활동과 타임아웃","icon":"🔄","color":"#ca8a04","story":"수술과 시술 전 확인으로 환자안전을 지켜주세요.","sentences":["본원에서 활용하는 질 향상 활동 방법은 Plan-do-check-act 이다.","올해 우리병원의 질 향상 활동 주제는 진료연속성 유지, 환자중심성 강화, 안전한 약물 사용 활동이다.","수술 시행 전 정확한 환자, 정확한 수술 부위, 예정된 수술명을 확인한다.","수술 부위가 좌우 구분이 되는 구조, 다중 구조, 다중 수준인 경우 반드시 수술 부위 표지를 시행한다.","수술 및 시술 전 의무기록, 영상, 검사자료 확인 시 정확한 환자 확인을 수행한다.","전신마취 전에는 마취 전 확인(Sign in)을 시행하고, 피부절개 전, 협의 수술 전, 시술 전에는 타임아웃(Time out)을 시행한다."]},{"topic":"환자안전사례","icon":"⚠️","color":"#ea580c","story":"사건을 숨기지 말고 보고하여 재발을 예방하세요.","sentences":["환자안전사례는 진료과정 중 예기치 못하게 발생하여 환자의 안전을 위협할 수 있는 사례이다.","적신호사건, 사건사고, 근접오류가 있다.","적신호사건은 발생 또는 발견 즉시 PI실에 보고해야 한다.","적신호사건 발생 시 주치의는 환자와 보호자에게 관련 정보를 제공한다.","국가의무보고는 다른 환자나 다른 부위 수술한 경우 해당된다.","또한 설명받고 동의받은 내용과 다른 수술, 수혈, 전신마취, 처방과 다른 약물, 용량, 경로의 투여, 병원 내 신체적 폭력 사례가 발생하여 사망 또는 심각한 손상을 입은 경우도 해당된다."]},{"topic":"환자안전문화","icon":"👥","color":"#7c3aed","story":"마지막 미션입니다. 함께 말하고 배우며 안전문화를 완성하세요.","sentences":["환자안전은 모든 직원이 함께 만들어가는 것이다.","환자안전문화와 관련하여 문제가 발생할 경우 PI실에 보고해야 한다.","모든 직원은 환자의 안전을 최우선으로 생각하고 위험을 발견하면 적극적으로 알리고 공유한다.","실수는 학습과 개선의 기회가 될 수 있다.","Speak up, listen up 문화는 환자안전을 지키기 위한 중요한 실천이다.","환자안전사례가 발생하면 사례 자체에 집중하고, 사람보다 시스템적 원인을 우선적으로 고려한다."]}];
-let si=0,qi=0,stageStart=0,chalStart=0,timer=null,stageTyped=0,stagePossible=0,stageCorrect=0,records=[],saved=false,master=false,paused=false,pauseStarted=0,counting=false,composing=false,lastErrors=0,lastShake=0;
+let si=0,qi=0,stageStart=0,chalStart=0,finalAt=null,timer=null,stageTyped=0,stagePossible=0,stageCorrect=0,records=[],saved=false,master=false,paused=false,pauseStarted=0,counting=false,composing=false,lastErrors=0,lastShake=0;
 const $=id=>document.getElementById(id);
 const reducedMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -399,12 +401,12 @@ function renderGrid(){
 }
 function goHome(){clearInterval(timer);stopBgm();paused=false;counting=false;$("pauseOverlay").classList.add("hidden");$("countOverlay").classList.add("hidden");show("home");formState()}
 function showSelect(){if(!valid(true))return;clearInterval(timer);stopBgm();paused=false;counting=false;$("pauseOverlay").classList.add("hidden");$("countOverlay").classList.add("hidden");renderGrid();show("select")}
-function startChallenge(){if(!valid(true))return;records=[];saved=false;chalStart=Date.now();startStage(0,true)}
+function startChallenge(){if(!valid(true))return;records=[];saved=false;finalAt=null;chalStart=Date.now();startStage(0,true)}
 
 /* ================= gameplay ================= */
 function startStage(i,keep=false){
   if(!valid(true))return;
-  if(!keep){records=[];saved=false;chalStart=Date.now()}
+  if(!keep){records=[];saved=false;finalAt=null;chalStart=Date.now()}
   si=i;qi=0;stageTyped=0;stagePossible=0;stageCorrect=0;lastErrors=0;
   clearInterval(timer);paused=false;
   $("pauseOverlay").classList.add("hidden");
@@ -508,7 +510,7 @@ async function allClear(){
       avgCpm=Math.round(typed/totalSec*60),
       final=Math.round(valid.reduce((a,r)=>a+r.score,0)/valid.length),
       r=rank(final);
-  $("finalName").textContent=info().name;
+  if(!finalAt)finalAt=new Date().toISOString();$("finalName").textContent=info().name+"("+info().unit+")";$("finalDate").textContent="완료일시 "+fmtDate(finalAt);
   $("totalScore").textContent=final+"점";
   $("scoreAgain").textContent=final;
   $("allAcc").textContent=avgAcc+"%";
@@ -522,7 +524,7 @@ async function allClear(){
   launchConfetti();
   if(!saved){
     saved=true;
-    await saveRecord({...info(),score:final,accuracy:avgAcc,cpm:avgCpm,totalSeconds:totalSec,rankLabel:r[0],rankName:r[1],stageRecords:valid,completedAt:new Date().toISOString()});
+    await saveRecord({...info(),score:final,accuracy:avgAcc,cpm:avgCpm,totalSeconds:totalSec,rankLabel:r[0],rankName:r[1],stageRecords:valid,completedAt:finalAt});
   }
 }
 
