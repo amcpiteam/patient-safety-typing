@@ -262,6 +262,7 @@ tr.me td{font-weight:800}
     <div class="field"><label for="empId">사번 앞 4자리</label><input id="empId" maxlength="4" placeholder="예) A123" autocomplete="off"></div>
     <div class="field"><label for="unit">소속 부서 또는 진료과</label><input id="unit" maxlength="30" placeholder="예) 000 Unit, 이비인후과, PI팀 등" autocomplete="off"></div>
     <div id="err" class="error" role="alert"></div>
+    <div id="masterChip" class="master">마스터 계정이 확인되었습니다. 랭킹 보기에서 마스터 로그인을 진행하세요.</div>
     <div class="consent"><label><input id="privacyConsent" type="checkbox"> <span>경품 수령 및 참여 확인을 위한 개인정보 수집·이용에 동의합니다. 수집 항목: 성명, 사번 앞 4자리, 소속 부서, 게임 기록.</span></label></div>
     <div class="consent"><label><input id="prizeConsent" type="checkbox"> <span>최종 참여 인증샷 제출을 완료해야 이벤트 참여가 가능하며, 경품 수령 시 경품 금액에 대한 세금은 추후 월급에서 차감되는 것에 동의합니다.</span></label></div>
     <div class="actions"><button id="startBtn" class="btn" onclick="startChallenge()" disabled>게임 시작</button><button id="selectBtn" class="btn white" onclick="showSelect()" disabled>Stage 보기</button><button class="btn white" onclick="openRanking()">랭킹 보기</button><button id="myResultBtn" class="btn white" onclick="showMyResult()" disabled>내 결과 보기</button></div>
@@ -335,14 +336,14 @@ tr.me td{font-weight:800}
   <div id="mode" class="mode"></div>
   <div id="masterPanel" class="masterPanel"><b>마스터 기능</b><div class="actions" style="justify-content:flex-start"><button class="btn" onclick="downloadCsv()">랭킹 목록 다운로드</button><button class="btn red" onclick="resetRankings()">랭킹 정보 리셋</button></div><p class="notice">다운로드 파일에는 실명, 사번 앞 4자리, 소속 부서, 점수, 기록이 포함됩니다.</p></div>
   <div class="tableWrap"><table><thead><tr><th>순위</th><th>도전자 이름</th><th>사번</th><th>소속 부서</th><th>총 점수</th><th>정확도</th><th>평균 타수</th><th>완료 시간</th><th>완료 일시</th></tr></thead><tbody id="rankBody"></tbody></table></div>
-  <div class="actions"><button id="masterLoginBtn" class="btn white" onclick="masterLogin()">🔑 마스터 로그인</button><button class="btn gray" onclick="closeRanking()">닫기</button></div>
+  <div class="actions"><button id="masterLoginBtn" class="btn white hidden" onclick="masterLogin()">🔑 마스터 로그인</button><button class="btn gray" onclick="closeRanking()">닫기</button></div>
 </div></div>
 
 <script>
-const CONFIG={BACKEND_URL:"https://script.google.com/macros/s/AKfycbxpZpYDJDjlYoKvEop8v3W7FOtqXHOjXpMXXbiIr4iBDpcbeZUEptc2tJFLBVZTGiR-og/exec"};
+const CONFIG={BACKEND_URL:"https://script.google.com/macros/s/AKfycbxpZpYDJDjlYoKvEop8v3W7FOtqXHOjXpMXXbiIr4iBDpcbeZUEptc2tJFLBVZTGiR-og/exec",MASTER_HASH:"1058518c73cb785070865f58c01ad47244736a5a2fd09a533ee9c602c7882aa7"};
 const STORAGE_KEY="amc_ps_typing_rank_v12";
 const stages=[{"topic":"환자 확인","icon":"📋","color":"#2563eb","story":"환자가 도착했습니다. 가장 먼저 정확한 환자 확인을 수행하세요.","sentences":["모든 의료서비스 제공 전 환자를 정확하게 확인한다.","환자명과 병원등록번호 또는 생년월일 중 두 가지 이상의 정보를 확인한다.","한 가지 이상의 정보를 개방형 질문으로 확인한다.","보호자가 없으면 서로 다른 부위에 두 개의 환자 확인 인식표를 적용하여 확인한다.","바코드 리딩 시스템으로 확인할 때는 개방형 질문으로 환자 정보를 문의한다.","동명이인 환자는 별도의 표식을 확인하여 주의한다."]},{"topic":"정확한 의사소통","icon":"🛡️","color":"#059669","story":"정확한 의사소통으로 안전한 진료를 이어가세요.","sentences":["환자에게 즉시 처방하고 수행해야 하나 바로 전산처방을 할 수 없는 경우에만 구두/전화 지시 처방 가능하다.","구두/전화 지시는 write down, read back, confirmation 절차를 준수한다.","구두/전화 지시 후 전산처방은 24시간 이내 시행한다.","구두지시처방코드관리 화면의 목록 내에서만 처방 가능하다.","PRN 처방은 허가된 목록 내에서만 처방하고 반드시 조건문을 입력한다.","부정확한 처방은 수행 전 처방의와 확인 후 수행한다."]},{"topic":"질 향상(PI) 활동과 타임아웃","icon":"🔄","color":"#ca8a04","story":"수술과 시술 전 확인으로 환자안전을 지켜주세요.","sentences":["본원에서 활용하는 질 향상 활동 방법은 Plan-do-check-act 이다.","올해 우리병원의 질 향상 활동 주제는 진료연속성 유지, 환자중심성 강화, 안전한 약물 사용 활동이다.","수술 시행 전 정확한 환자, 정확한 수술 부위, 예정된 수술명을 확인한다.","수술 부위가 좌우 구분이 되는 구조, 다중 구조, 다중 수준인 경우 반드시 수술 부위 표지를 시행한다.","수술 및 시술 전 의무기록, 영상, 검사자료 확인 시 정확한 환자 확인을 수행한다.","전신마취 전에는 마취 전 확인(Sign in)을 시행하고, 피부절개 전, 협의 수술 전, 시술 전에는 타임아웃(Time out)을 시행한다."]},{"topic":"환자안전사례","icon":"⚠️","color":"#ea580c","story":"사건을 숨기지 말고 보고하여 재발을 예방하세요.","sentences":["환자안전사례는 진료과정 중 예기치 못하게 발생하여 환자의 안전을 위협할 수 있는 사례이다.","적신호사건, 사건사고, 근접오류가 있다.","적신호사건은 발생 또는 발견 즉시 PI실에 보고해야 한다.","적신호사건 발생 시 주치의는 환자와 보호자에게 관련 정보를 제공한다.","국가의무보고는 다른 환자나 다른 부위 수술한 경우 해당된다.","또한 설명받고 동의받은 내용과 다른 수술, 수혈, 전신마취, 처방과 다른 약물, 용량, 경로의 투여, 병원 내 신체적 폭력 사례가 발생하여 사망 또는 심각한 손상을 입은 경우도 해당된다."]},{"topic":"환자안전문화","icon":"👥","color":"#7c3aed","story":"마지막 미션입니다. 함께 말하고 배우며 안전문화를 완성하세요.","sentences":["환자안전은 모든 직원이 함께 만들어가는 것이다.","환자안전문화와 관련하여 문제가 발생할 경우 PI실에 보고해야 한다.","모든 직원은 환자의 안전을 최우선으로 생각하고 위험을 발견하면 적극적으로 알리고 공유한다.","실수는 학습과 개선의 기회가 될 수 있다.","Speak up, listen up 문화는 환자안전을 지키기 위한 중요한 실천이다.","환자안전사례가 발생하면 사례 자체에 집중하고, 사람보다 시스템적 원인을 우선적으로 고려한다."]}];
-let si=0,qi=0,stageStart=0,chalStart=0,finalAt=null,timer=null,stageTyped=0,stagePossible=0,stageCorrect=0,records=[],saved=false,master=false,masterKey="",paused=false,pauseStarted=0,counting=false,composing=false,lastErrors=0,lastShake=0;
+let si=0,qi=0,stageStart=0,chalStart=0,finalAt=null,timer=null,stageTyped=0,stagePossible=0,stageCorrect=0,records=[],saved=false,master=false,masterEligible=false,masterKey="",paused=false,pauseStarted=0,counting=false,composing=false,lastErrors=0,lastShake=0;
 const $=id=>document.getElementById(id);
 const reducedMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -378,7 +379,8 @@ function valid(alertIt=false){
   if(alertIt&&msg) alert(msg);
   return !msg;
 }
-async function formState(){let ok=valid(false);$("startBtn").disabled=!ok;$("selectBtn").disabled=!ok;$("myResultBtn").disabled=!ok}
+async function sha256(t){let b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function formState(){let ok=valid(false);$("startBtn").disabled=!ok;$("selectBtn").disabled=!ok;$("myResultBtn").disabled=!ok;let p=info();try{masterEligible=(await sha256(`${p.name}|${p.unit}|${p.employeeId}`))===CONFIG.MASTER_HASH}catch(e){masterEligible=false}$("masterChip").classList.toggle("on",masterEligible)}
 ["name","empId","unit","privacyConsent","prizeConsent"].forEach(id=>{$(id).addEventListener("input",formState);$(id).addEventListener("change",formState)});
 
 /* ================= stage select ================= */
@@ -616,7 +618,7 @@ async function openRanking(){
   await formState();
   $("rankingModal").classList.remove("hidden");
   $("mode").textContent=CONFIG.BACKEND_URL?"운영 모드: 공동 랭킹 서버에 연결되어 있습니다.":"테스트 모드: 현재는 이 브라우저에만 랭킹이 저장됩니다. 공동 랭킹을 쓰려면 Google Apps Script URL을 CONFIG.BACKEND_URL에 입력하세요.";
-  $("masterPanel").classList.toggle("on",master);$("masterLoginBtn").classList.toggle("hidden",master);
+  $("masterPanel").classList.toggle("on",master);$("masterLoginBtn").classList.toggle("hidden",!(masterEligible&&!master));
   let body=$("rankBody");
   body.innerHTML='<tr><td colspan="9">불러오는 중입니다.</td></tr>';
   try{
